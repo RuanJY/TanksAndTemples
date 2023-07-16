@@ -160,7 +160,8 @@ if __name__ == "__main__":
         "--traj-path",
         type=str,
         required=True,
-        help="path to trajectory file. See `convert_to_logfile.py` to create this file.",
+        help=
+        "path to trajectory file. See `convert_to_logfile.py` to create this file.",
     )
     parser.add_argument(
         "--ply-path",
@@ -172,14 +173,14 @@ if __name__ == "__main__":
         "--out-dir",
         type=str,
         default="",
-        help="output directory, default: an evaluation directory is created in the directory of the ply file",
+        help=
+        "output directory, default: an evaluation directory is created in the directory of the ply file",
     )
     args = parser.parse_args()
 
     if args.out_dir.strip() == "":
-        args.out_dir = os.path.join(
-            os.path.dirname(args.ply_path), "evaluation"
-        )
+        args.out_dir = os.path.join(os.path.dirname(args.ply_path),
+                                    "evaluation")
 
     run_evaluation(
         dataset_dir=args.dataset_dir,
