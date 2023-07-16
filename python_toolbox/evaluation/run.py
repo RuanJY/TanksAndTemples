@@ -36,6 +36,7 @@
 # this script requires Open3D python binding
 # please follow the intructions in setup.py before running this script.
 import numpy as np
+from numpy.core.numeric import identity
 import open3d as o3d
 import os
 import argparse
@@ -52,58 +53,58 @@ from util import make_dir
 from plot import plot_graph
 
 
-def run_evaluation(dataset_dir, traj_path, ply_path, out_dir):
-    scene = os.path.basename(os.path.normpath(dataset_dir))
+def run_evaluation(dataset_dir, ply_path, out_dir):
+    scene = "__"
 
-    if scene not in scenes_tau_dict:
-        print(dataset_dir, scene)
-        raise Exception("invalid dataset-dir, not in scenes_tau_dict")
+    #if scene not in scenes_tau_dict:
+    #    print(dataset_dir, scene)
+    #    raise Exception("invalid dataset-dir, not in scenes_tau_dict")
 
-    print("")
-    print("===========================")
-    print("Evaluating %s" % scene)
-    print("===========================")
+    #print("")
+    #print("===========================")
+    #print("Evaluating %s" % scene)
+    #print("===========================")
 
-    dTau = scenes_tau_dict[scene]
+    dTau = 0.1#scenes_tau_dict[scene]
     # put the crop-file, the GT file, the COLMAP SfM log file and
     # the alignment of the according scene in a folder of
     # the same scene name in the dataset_dir
-    colmap_ref_logfile = os.path.join(dataset_dir, scene + "_COLMAP_SfM.log")
-    alignment = os.path.join(dataset_dir, scene + "_trans.txt")
-    gt_filen = os.path.join(dataset_dir, scene + ".ply")
-    cropfile = os.path.join(dataset_dir, scene + ".json")
-    map_file = os.path.join(dataset_dir, scene + "_mapping_reference.txt")
+    #colmap_ref_logfile = os.path.join(dataset_dir, scene + "_COLMAP_SfM.log")
+    #alignment = os.path.join(dataset_dir, scene + "_trans.txt")
+    gt_filen = dataset_dir
+    #cropfile = os.path.join(dataset_dir, scene + ".json")
+    #map_file = os.path.join(dataset_dir, scene + "_mapping_reference.txt")
 
     make_dir(out_dir)
 
     # Load reconstruction and according GT
     print(ply_path)
-    pcd = o3d.io.read_point_cloud(ply_path)
+    mesh_build = o3d.io.read_triangle_mesh(ply_path)
+    pcd =  o3d.geometry.TriangleMesh.sample_points_uniformly(mesh_build, 6553600)#6553600
     print(gt_filen)
     gt_pcd = o3d.io.read_point_cloud(gt_filen)
+    #gt_trans = np.loadtxt(alignment)
+    #traj_to_register = read_trajectory(traj_path)
+    #gt_traj_col = read_trajectory(colmap_ref_logfile)
 
-    gt_trans = np.loadtxt(alignment)
-    traj_to_register = read_trajectory(traj_path)
-    gt_traj_col = read_trajectory(colmap_ref_logfile)
-
-    trajectory_transform = trajectory_alignment(
-        map_file, traj_to_register, gt_traj_col, gt_trans, scene
-    )
+    #trajectory_transform = trajectory_alignment(
+    #    map_file, traj_to_register, gt_traj_col, gt_trans, scene
+    #)
 
     # Refine alignment by using the actual GT and MVS pointclouds
-    vol = o3d.visualization.read_selection_polygon_volume(cropfile)
+    #vol = o3d.visualization.read_selection_polygon_volume(cropfile)
     # big pointclouds will be downlsampled to this number to speed up alignment
     dist_threshold = dTau
 
     # Registration refinment in 3 iterations
-    r2 = registration_vol_ds(
-        pcd, gt_pcd, trajectory_transform, vol, dTau, dTau * 80, 20
-    )
-    r3 = registration_vol_ds(
-        pcd, gt_pcd, r2.transformation, vol, dTau / 2.0, dTau * 20, 20
-    )
-    r = registration_unif(pcd, gt_pcd, r3.transformation, vol, 2 * dTau, 20)
-
+    #r2 = registration_vol_ds(
+    #    pcd, gt_pcd, trajectory_transform, vol, dTau, dTau * 80, 20
+    #)
+    #r3 = registration_vol_ds(
+    #    pcd, gt_pcd, r2.transformation, vol, dTau / 2.0, dTau * 20, 20
+    #)
+    #r = registration_unif(pcd, gt_pcd, r3.transformation, vol, 2 * dTau, 20)
+    #transformation = identity
     # Histogramms and P/R/F1
     plot_stretch = 5
     [
@@ -117,8 +118,6 @@ def run_evaluation(dataset_dir, traj_path, ply_path, out_dir):
     ] = EvaluateHisto(
         pcd,
         gt_pcd,
-        r.transformation,
-        vol,
         dTau / 2.0,
         dTau,
         out_dir,
@@ -184,7 +183,7 @@ if __name__ == "__main__":
 
     run_evaluation(
         dataset_dir=args.dataset_dir,
-        traj_path=args.traj_path,
+        #traj_path=args.traj_path,
         ply_path=args.ply_path,
         out_dir=args.out_dir,
     )

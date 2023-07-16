@@ -60,8 +60,6 @@ def write_color_distances(path, pcd, distances, max_distance):
 def EvaluateHisto(
     source,
     target,
-    trans,
-    crop_volume,
     voxel_size,
     threshold,
     filename_mvs,
@@ -72,14 +70,14 @@ def EvaluateHisto(
     print("[EvaluateHisto]")
     o3d.utility.set_verbosity_level(o3d.utility.VerbosityLevel.Debug)
     s = copy.deepcopy(source)
-    s.transform(trans)
-    s = crop_volume.crop_point_cloud(s)
+    #s.transform(trans)
+    #s = crop_volume.crop_point_cloud(s)
     s = s.voxel_down_sample(voxel_size)
     s.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamKNN(knn=20))
     print(filename_mvs + "/" + scene_name + ".precision.ply")
 
     t = copy.deepcopy(target)
-    t = crop_volume.crop_point_cloud(t)
+    #t = crop_volume.crop_point_cloud(t)
     t = t.voxel_down_sample(voxel_size)
     t.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamKNN(knn=20))
     print("[compute_point_cloud_to_point_cloud_distance]")

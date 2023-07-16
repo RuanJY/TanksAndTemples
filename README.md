@@ -1,3 +1,19 @@
+Modification by jianyuan ruan:
+
+To compare two mesh map directly, I remove the required trajectory.
+
+So, to use it:
+
+```
+cd TanksAndTemples_direct_rjy/python_toolbox/evaluation/
+python run.py \
+--dataset-dir ./data/ground_truth_mesh.ply \
+--traj-path ./ \
+--ply-path ./data/your_mesh.ply
+```
+
+The threshold and sampling density are also changed because the outdoor scenario is much larger than the original dataset, and the accuracy is lower than the original reconstruction.
+
 # Tanks and Temples
 
 This repository is used for discussing issues regarding the website that hosts the *Tanks and Temples* dataset.  
